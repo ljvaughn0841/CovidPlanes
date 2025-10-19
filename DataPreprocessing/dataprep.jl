@@ -3,7 +3,7 @@ module DataPrep
 using CSV
 using DataFrames
 
-function read_asc(filepath)
+function read_route_data(filepath)
     # Headers
     headers = [
         "Year",
@@ -36,8 +36,15 @@ function read_asc(filepath)
         "CarrierWAC",
         "NULL"]
 
-    # Read the ASC file into a DataFrame
-    df = CSV.read(filepath, DataFrame, delim='|', header=headers)
+    if endswith(filepath, ".asc")
+        # Read the ASC file into a DataFrame
+        df = CSV.read(filepath, DataFrame, delim='|', header=headers)
+    elseif endswith(filepath, ".csv")
+        df = CSV.read(filepath, DataFrame, header=headers)
+    else
+        println("Unnaceptable Datatype")
+        return
+    end
 
     # Get rid of the NULL column
     select!(df, Not(names(df)[end]))
@@ -45,29 +52,11 @@ function read_asc(filepath)
     df = transform(df, :OriginCity => ByRow(s -> split(s, ", ")) => [:OriginCity, :OriginState])
     df = transform(df, :DestinationCity => ByRow(s -> split(s, ", ")) => [:DestinationCity, :DestinationState])
 
-
-        "CarrierAlphaCode",
-        "CarrierCode",
-        "GroupCode",
-        "Distance",
-        "ServiceClass",
-        "AircraftGroup",
-        "AircraftMakeandModel",
-        "AircraftConfig",
-        "DeparturesPerformed",
-        "DeparturesScheduled",
-        "AvailableCapacityLbs",
-        "EmptySeats",
-        "PassengersTransported",
-        "FreightTransported",
-        "MailTransported",
-        "RampTime",
-        "AirbornTime",
-        "CarrierWAC",
-        "NULL"
+    df.Origin = string.(df.OriginCity,", ", df.OriginState)
+    df.Dest = string.(df.DestinationCity,", ", df.DestinationState)
 
     # Define the desired order of columns
-    desired_order = [:Year, :Month, :OriginCity, :OriginState, :DestinationCity, :DestinationState,
+    desired_order = [:Year, :Month, :Origin, :Dest,
     :Distance, :RampTime, :AirbornTime,
     :AvailableCapacityLbs, :AvailableSeats, :PassengersTransported, :FreightTransported, :MailTransported,
 
@@ -75,6 +64,8 @@ function read_asc(filepath)
 
     :AircraftGroup, :AircraftMakeandModel, :AircraftConfig, :ServiceClass,
     :DeparturesPerformed, :DeparturesScheduled,
+
+    :OriginCity, :OriginState, :DestinationCity, :DestinationState,
 
     :OriginAirportAlpha, :OriginAirportCode, :OriginWAC,
     :DestinationAirportAlpha, :DestinationAirportCode, :DestinationWAC]
@@ -136,5 +127,34 @@ function read_coords(filepath, flight_data)
     unique!(final_coords, :DisplayName)
     return final_coords
 end
+
+
+
+function us_filter(df, US_coords)
+
+    US_coords = filter(:LATITUDE => L -> L > 18.743496240902473, US_coords) # Southern boundary
+    US_coords = filter(:LATITUDE => L -> L < 71.55757363763155, US_coords) # Northern Boundary
+    US_coords = filter(:LONGITUDE => L -> L > -169.5192533743284, US_coords) # Eastern Boundary
+    US_coords = filter(:LONGITUDE => L -> L < -56.99967737291253, US_coords) # Western Boundary
+
+    filter!(:State => S -> S != "PR", US_coords) # Puerto Rico Filter
+
+    US_coords.row_id = 1:nrow(US_coords) # This is necessary for Graphing Points Later
+
+    # Set of valid display names
+    valid_names = Set(US_coords.DisplayName)
+
+    # Filter the data DataFrame
+    US_df = filter(row -> row.Origin in valid_names && row.Dest in valid_names, df)
+
+    # Puerto Rico Filter
+    filter!(row -> row.Origin != "PR" && row.Dest != "PR", US_df)
+
+    return US_df, US_coords
+end
+
+
+
+
 
 end # end of DataPrep module

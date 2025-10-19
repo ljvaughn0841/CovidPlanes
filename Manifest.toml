@@ -2,7 +2,7 @@
 
 julia_version = "1.12.0"
 manifest_format = "2.0"
-project_hash = "e0dfeecf6b1c952f66e24bf8f2f4888e00ceb255"
+project_hash = "02d9db76d9da7abedb82e4504c4d07d09bb2bd71"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -251,9 +251,9 @@ version = "1.16.0"
 
 [[deps.DataFrames]]
 deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrecompileTools", "PrettyTables", "Printf", "Random", "Reexport", "SentinelArrays", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
-git-tree-sha1 = "c967271c27a95160e30432e011b58f42cd7501b5"
+git-tree-sha1 = "d8928e9169ff76c6281f39a659f9bca3a573f24c"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "1.8.0"
+version = "1.8.1"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -509,9 +509,9 @@ weakdeps = ["GeoInterface"]
 
 [[deps.GeometryOps]]
 deps = ["AbstractTrees", "AdaptivePredicates", "CoordinateTransformations", "DataAPI", "DelaunayTriangulation", "ExactPredicates", "Extents", "GeoFormatTypes", "GeoInterface", "GeometryOpsCore", "LinearAlgebra", "Random", "SortTileRecursiveTree", "StaticArrays", "Statistics", "Tables"]
-git-tree-sha1 = "4f948c146b97c2dd62300bdf31a773c6301dc3c2"
+git-tree-sha1 = "279ed959269deed572e5e068e7ae893aab699a25"
 uuid = "3251bfac-6a57-4b6d-aa61-ac1fef2975ab"
-version = "0.1.29"
+version = "0.1.30"
 
     [deps.GeometryOps.extensions]
     GeometryOpsDataFramesExt = "DataFrames"
@@ -1367,6 +1367,12 @@ git-tree-sha1 = "be8eeac05ec97d379347584fa9fe2f5f76795bcb"
 uuid = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 version = "0.9.5"
 
+[[deps.SimpleWeightedGraphs]]
+deps = ["Graphs", "LinearAlgebra", "Markdown", "SparseArrays"]
+git-tree-sha1 = "3e5f165e58b18204aed03158664c4982d691f454"
+uuid = "47aef6b3-ad0c-573a-a1e2-d07658019622"
+version = "1.5.0"
+
 [[deps.Sixel]]
 deps = ["Dates", "FileIO", "ImageCore", "IndirectArrays", "OffsetArrays", "REPL", "libsixel_jll"]
 git-tree-sha1 = "0494aed9501e7fb65daba895fb7fd57cc38bc743"
@@ -1478,9 +1484,9 @@ version = "0.4.1"
 
 [[deps.StructArrays]]
 deps = ["ConstructionBase", "DataAPI", "Tables"]
-git-tree-sha1 = "8ad2e38cbb812e29348719cc63580ec1dfeb9de4"
+git-tree-sha1 = "a2c37d815bf00575332b7bd0389f771cb7987214"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.7.1"
+version = "0.7.2"
 
     [deps.StructArrays.extensions]
     StructArraysAdaptExt = "Adapt"
@@ -1582,9 +1588,9 @@ version = "0.4.1"
 
 [[deps.Unitful]]
 deps = ["Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "cec2df8cf14e0844a8c4d770d12347fda5931d72"
+git-tree-sha1 = "83360bda12f61c250835830cc40b64f487cc2230"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.25.0"
+version = "1.25.1"
 
     [deps.Unitful.extensions]
     ConstructionBaseUnitfulExt = "ConstructionBase"
