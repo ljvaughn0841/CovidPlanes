@@ -63,6 +63,10 @@ function BuildGraph(df::DataFrame)
     #Ignore Freight planes
     edges = filter(:weight => w -> w > 0, edges)
 
+    # Removes Freight Planes from Df
+    filter!(:DestinationAirportAlpha => A -> A in edges.DestinationAirportAlpha, df)
+    filter!(:OriginAirportAlpha => A -> A in edges.OriginAirportAlpha, df)
+
     #Define a vector of unique nodes
     nodes = union(df[!, :OriginAirportAlpha], df[!, :DestinationAirportAlpha])
 
@@ -220,10 +224,10 @@ function us_graph(US_data::DataFrame, US_coords::DataFrame)
   graphplot!(
     ga, g;
     layout = _ -> positions_vector, node_size = 5,
-    # edge_color = (:blue, 0.01)
+    edge_color = (:blue, 0.01)
     # TODO: Define edge color by degree or some other factor
-    # TODO: Figure out transparency
-    edge_color = cgrad(:plasma, 0.05)[LinRange(0, 1, ne(g))]
+    # TODO: Figure out transparency for a range of colors
+    # edge_color = cgrad(:plasma, 0.05)[LinRange(0, 1, ne(g))]
   )
 
   return fig

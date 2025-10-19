@@ -3,7 +3,7 @@ module DataPrep
 using CSV
 using DataFrames
 
-function read_route_data(filepath)
+function read_route_data(filepath::String)
     # Headers
     headers = [
         "Year",
@@ -79,7 +79,7 @@ function read_route_data(filepath)
     return df
 end
 
-function asc_to_csv(filepath)
+function asc_to_csv(filepath::String)
 
     data = read_asc(filepath)
 
@@ -146,6 +146,9 @@ function us_filter(df, US_coords)
 
     # Filter the data DataFrame
     US_df = filter(row -> row.Origin in valid_names && row.Dest in valid_names, df)
+
+    # Removing Self Loops (Flights between areas in the same city)
+    filter!(row -> row.Origin != Row.Dest, US_df)
 
     # Puerto Rico Filter
     filter!(row -> row.Origin != "PR" && row.Dest != "PR", US_df)
