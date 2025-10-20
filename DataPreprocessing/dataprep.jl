@@ -3,6 +3,22 @@ module DataPrep
 using CSV
 using DataFrames
 
+# Helper: parse value to Float64 or return missing
+function parse_float_or_missing(x)
+    if x === missing
+        return missing
+    elseif isa(x, AbstractString)
+        v = tryparse(Float64, x)
+        return v === nothing ? missing : v
+    else
+        try
+            return Float64(x)
+        catch
+            return missing
+        end
+    end
+end
+
 function read_route_data(filepath::String)
     # Headers
     headers = [
@@ -94,6 +110,21 @@ function read_coords(filepath, flight_data)
     select!(coords, :DISPLAY_AIRPORT_CITY_NAME_FULL, :LATITUDE, :LONGITUDE)
     unique!(coords, :DISPLAY_AIRPORT_CITY_NAME_FULL)
 
+    # Ensure LATITUDE and LONGITUDE are numeric and drop rows with missing/non-finite values
+    coords.LATITUDE = parse_float_or_missing.(coords.LATITUDE)
+    coords.LONGITUDE = parse_float_or_missing.(coords.LONGITUDE)
+    # remove rows where coordinates couldn't be parsed
+    before_rows = nrow(coords)
+    filter!(:LATITUDE => L -> !ismissing(L) && isfinite(L), coords)
+    filter!(:LONGITUDE => L -> !ismissing(L) && isfinite(L), coords)
+    # enforce valid geographic ranges
+    filter!(:LATITUDE => L -> -90.0 <= L <= 90.0, coords)
+    filter!(:LONGITUDE => L -> -180.0 <= L <= 180.0, coords)
+    after_rows = nrow(coords)
+    if after_rows < before_rows
+        @info "read_coords: dropped $(before_rows - after_rows) rows with missing or out-of-range coordinates"
+    end
+
     flight_data.Origin = string.(flight_data.OriginCity,", ", flight_data.OriginState)
     flight_data.Dest = string.(flight_data.DestinationCity,", ", flight_data.DestinationState)
 
@@ -148,7 +179,7 @@ function us_filter(df, US_coords)
     US_df = filter(row -> row.Origin in valid_names && row.Dest in valid_names, df)
 
     # Removing Self Loops (Flights between areas in the same city)
-    filter!(row -> row.Origin != Row.Dest, US_df)
+    filter!(row -> row.Origin != row.Dest, US_df)
 
     # Puerto Rico Filter
     filter!(row -> row.Origin != "PR" && row.Dest != "PR", US_df)
