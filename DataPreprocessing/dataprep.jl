@@ -1,9 +1,23 @@
+"""
+DataPrep Module for Data Loading, Preprocessing, and Cleaning of Flight Data
+"""
 module DataPrep
 
 using CSV
 using DataFrames
 
-# Helper: parse value to Float64 or return missing
+"""
+parse_float_or_missing(x)
+
+Attempt to coerce `x` to a Float64. If `x` is missing, non-numeric or cannot be parsed
+the function returns `missing`.
+
+Arguments
+- x: value to coerce (String, Number or missing)
+
+Returns
+- Float64 or `missing`.
+"""
 function parse_float_or_missing(x)
     if x === missing
         return missing
@@ -19,6 +33,18 @@ function parse_float_or_missing(x)
     end
 end
 
+"""
+read_route_data(filepath::String)
+
+Read the BTS route data file (.asc or .csv) into a cleaned `DataFrame` with a fixed
+column order and a subset of fields useful for this project.
+
+Arguments
+- filepath: path to the .asc (pipe-delimited) or .csv file exported from the DB28
+
+Returns
+- DataFrame with columns reordered, parsed city/state pairs and sorted by Year, Month.
+"""
 function read_route_data(filepath::String)
     # Headers
     headers = [
@@ -95,6 +121,16 @@ function read_route_data(filepath::String)
     return df
 end
 
+"""
+asc_to_csv(filepath::String)
+
+Convert an ASC-format DB28 file to CSV and write it as `AirplaneDataset.csv`.
+
+Arguments
+- filepath: path to the .asc file
+
+Note: this is a small convenience wrapper around `read_asc` and `CSV.write`.
+"""
 function asc_to_csv(filepath::String)
 
     data = read_asc(filepath)
@@ -103,6 +139,24 @@ function asc_to_csv(filepath::String)
 
 end
 
+"""
+read_coords(filepath, flight_data)
+
+Read airport coordinates from `filepath` and join them with `flight_data` to produce
+a `DataFrame` of unique airport display names and their coordinates.
+
+Behavior
+- Ensures `LATITUDE` and `LONGITUDE` are numeric (coerces strings), drops rows with
+    missing or out-of-range coordinates, and returns a DataFrame with DisplayName,
+    LATITUDE, LONGITUDE and city/state information for origins and destinations.
+
+Arguments
+- filepath: path to coordinates CSV (expected to contain `DISPLAY_AIRPORT_CITY_NAME_FULL`, `LATITUDE`, `LONGITUDE`)
+- flight_data: DataFrame produced by `read_route_data` used to filter relevant airports
+
+Returns
+- DataFrame with unique `DisplayName`, `LATITUDE`, `LONGITUDE`, `City`, `State`.
+"""
 function read_coords(filepath, flight_data)
     coords = CSV.read(filepath, DataFrame)
 
@@ -161,6 +215,20 @@ end
 
 
 
+"""
+us_filter(df, US_coords)
+
+Filter the flight `df` and the `US_coords` table to continental US bounds and remove
+territories. Adds a `row_id` column to `US_coords` (1..nrow) used as graph node ids.
+
+Arguments
+- df: flight DataFrame with `Origin` and `Dest` columns matching `US_coords.DisplayName`
+- US_coords: DataFrame of airport coordinates and display names
+
+Returns
+- (US_df, US_coords) where US_df contains only flights between valid US_coords
+    DisplayNames and US_coords has been restricted to continental bounds and assigned `row_id`.
+"""
 function us_filter(df, US_coords)
 
     US_coords = filter(:LATITUDE => L -> L > 18.743496240902473, US_coords) # Southern boundary
